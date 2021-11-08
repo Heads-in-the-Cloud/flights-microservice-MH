@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smoothstack.utopia_spring.exception.IdNotFoundException;
 import com.smoothstack.utopia_spring.entity.Flight;
 import com.smoothstack.utopia_spring.exception.*;
 import com.smoothstack.utopia_spring.service.FlightService;
@@ -30,14 +31,14 @@ public class FlightController {
 	}
 	
 	//Create
-	@PostMapping
+	@PostMapping("/add")
 	public ResponseEntity<Flight> addFlight(@RequestBody Flight flight) {
 		service.save(flight);
 		return ResponseEntity.ok(flight);
 	}
 	
 	//Read
-	@GetMapping
+	@GetMapping("/all")
 	public ResponseEntity<List<Flight>> readAllFlights() {
 		
 		List<Flight> flights = service.readAll();
@@ -54,18 +55,21 @@ public class FlightController {
 	}
 	
 	//Update
-	@PutMapping("/{id}")
+	@PutMapping("/update/{id}")
 	public ResponseEntity<String> updateFlight(@PathVariable int id, @RequestBody Flight flight) {
 		
+		//Check if path id = id
 		if(id != flight.getId()) {
 			throw new IdMismatchException();
 		}
+		//Check if the record to update exists
+		Flight temp = service.readById(id).orElseThrow(IdNotFoundException::new);
 		service.save(flight);
 		return ResponseEntity.ok("Flight updated successfully");
 	}
 	
 	//Delete
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteFlight(@PathVariable int id) {
 		
 		service.delete(id);

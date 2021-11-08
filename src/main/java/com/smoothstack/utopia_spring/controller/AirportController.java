@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smoothstack.utopia_spring.exception.IdNotFoundException;
 import com.smoothstack.utopia_spring.entity.Airport;
 import com.smoothstack.utopia_spring.exception.*;
 import com.smoothstack.utopia_spring.service.AirportService;
@@ -30,14 +31,14 @@ public class AirportController {
 	}
 	
 	//Create
-	@PostMapping
+	@PostMapping("/add")
 	public ResponseEntity<Airport> addAirport(@RequestBody Airport airport) {
 		service.save(airport);
 		return ResponseEntity.ok(airport);
 	}
 	
 	//Read
-	@GetMapping
+	@GetMapping("/all")
 	public ResponseEntity<List<Airport>> readAllAirports() {
 		
 		List<Airport> airports = service.readAll();
@@ -54,18 +55,21 @@ public class AirportController {
 	}
 	
 	//Update
-	@PutMapping("/{id}")
+	@PutMapping("/update/{id}")
 	public ResponseEntity<String> updateAirport(@PathVariable String id, @RequestBody Airport airport) {
 		
+		//Check if path id = id
 		if(id != airport.getAirportCode()) {
 			throw new IdMismatchException();
 		}
+		//Check if the record to update exists
+		Airport temp = service.readById(id).orElseThrow(IdNotFoundException::new);
 		service.save(airport);
 		return ResponseEntity.ok("Airport updated successfully");
 	}
 	
 	//Delete
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteAirport(@PathVariable String id) {
 		
 		service.delete(id);

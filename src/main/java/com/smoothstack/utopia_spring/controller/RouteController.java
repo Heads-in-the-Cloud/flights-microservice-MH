@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smoothstack.utopia_spring.exception.IdNotFoundException;
 import com.smoothstack.utopia_spring.entity.Route;
 import com.smoothstack.utopia_spring.exception.*;
 import com.smoothstack.utopia_spring.service.RouteService;
@@ -30,14 +31,14 @@ public class RouteController {
 	}
 	
 	//Create
-	@PostMapping
+	@PostMapping("/add")
 	public ResponseEntity<Route> addRoute(@RequestBody Route route) {
 		service.save(route);
 		return ResponseEntity.ok(route);
 	}
 	
 	//Read
-	@GetMapping
+	@GetMapping("/all")
 	public ResponseEntity<List<Route>> readAllRoutes() {
 		
 		List<Route> routes = service.readAll();
@@ -54,18 +55,21 @@ public class RouteController {
 	}
 	
 	//Update
-	@PutMapping("/{id}")
+	@PutMapping("/update/{id}")
 	public ResponseEntity<String> updateRoute(@PathVariable int id, @RequestBody Route route) {
 		
+		//Check if path id = id
 		if(id != route.getId()) {
 			throw new IdMismatchException();
 		}
+		//Check if the record to update exists
+		Route temp = service.readById(id).orElseThrow(IdNotFoundException::new);
 		service.save(route);
 		return ResponseEntity.ok("Route updated successfully");
 	}
 	
 	//Delete
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Void> deleteRoute(@PathVariable int id) {
 		
 		service.delete(id);
